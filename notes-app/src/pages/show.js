@@ -1,6 +1,6 @@
 import React from "react";
 
-function ShowPage({ match }) {
+function ShowPage({ match, notes }) {
     const note = this.state.notes[match.params.id];
 
     if (!note) {

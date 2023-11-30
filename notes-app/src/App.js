@@ -37,14 +37,16 @@ class App extends Component {
   }
 
   render(){
+    console.log(this.state)
     return (
         <div className='App'>
           <Router>
             <Routes>
-              <Route exact path="/" element={(props) => <IndexPage {...props} notes={this.state.notes}/>} />
+              <Route exact path="/" element={ <IndexPage notes={this.state.notes} />} />
               <Route exact path="/notes/:id" element={<ShowPage notes={this.state.notes} />} />
             </Routes>
           </Router>
+
         </div>
     );
   }
