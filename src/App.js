@@ -11,25 +11,22 @@ import DB from './db';
 
 class App extends Component {
   state = {
-    db: new DB("notes"),
-    notes: {
-      notes: {}
-    }
+    db: new DB('notes-react'),
+    notes: {},
+    loading: true
   }
 
   async componentDidMount() {
     const notes = await this.state.db.getAllNotes();
 
     this.setState({
-      notes
+      notes,
+      loading: false
     });
   }
 
-  handleSave = (note) => {
-    const ids = Object.keys(this.state.notes);
-    const id = Math.max(...ids) + 1
-
-    note['_id'] = id;
+  handleSave =async (note) => {
+    let { id } = await this.state.db.createNote(note);
 
     const { notes } = this.state;
 
@@ -43,17 +40,26 @@ class App extends Component {
     return id
   }
 
+  renderContext() {
+    if (this.state.loading) {
+      return <h2>Loading...</h2>
+    }
+    return (
+      <div className='app-content'>
+        <Route exact path="/" component={(props) => <IndexPage {...props} notes={this.state.notes} />} />
+        <Route exact path="/notes/:id" component={(props) => <ShowPage {...props} note={this.state.notes[props.match.params.id]} />} />
+        <Route exact path="/new" component={(props) => <NewPage {...props} onSave={this.handleSave} />} />
+      </div>
+    )
+  }
+
   render(){
     console.log(this.state)
     return (
       <Router>
         <div className='App'>
           <Navbar />
-          <div className='app-content'>
-            <Route exact path="/" component={(props) => <IndexPage {...props} notes={this.state.notes} />} />
-            <Route exact path="/notes/:id" component={(props) => <ShowPage {...props} note={this.state.notes[props.match.params.id]} />} />
-            <Route exact path="/new" component={(props) => <NewPage {...props} onSave={this.handleSave} />} />
-          </div>      
+          { this.renderContext() } 
         </div>
         </Router>
     );
