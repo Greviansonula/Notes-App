@@ -5,49 +5,57 @@ import './App.css';
 
 import IndexPage from './pages/index';
 import ShowPage from './pages/show';
+import Navbar from './components/navbar';
+import NewPage from './pages/new';
+import DB from './db';
 
 class App extends Component {
   state = {
+    db: new DB("notes"),
     notes: {
-      1: {
-        _id: 1,
-        title: "Hello, world",
-        body: "This is the nody of my note",
-        updatedAt: new Date()
-      },
-      2: {
-        _id: 2,
-        title: "Mechanics of React App",
-        body: "This is the nody of my note",
-        updatedAt: new Date()
-      },
-      3: {
-        _id: 3,
-        title: "This is AI",
-        body: "This is the nody of my note",
-        updatedAt: new Date()
-      },
-      4: {
-        _id: 4,
-        title: "We are taking over the world",
-        body: "This is the nody of my note",
-        updatedAt: new Date()
-      },
+      notes: {}
     }
+  }
+
+  async componentDidMount() {
+    const notes = await this.state.db.getAllNotes();
+
+    this.setState({
+      notes
+    });
+  }
+
+  handleSave = (note) => {
+    const ids = Object.keys(this.state.notes);
+    const id = Math.max(...ids) + 1
+
+    note['_id'] = id;
+
+    const { notes } = this.state;
+
+    this.setState({
+      notes: {
+        ...notes,
+        [id]: note
+      }
+    });
+
+    return id
   }
 
   render(){
     console.log(this.state)
     return (
+      <Router>
         <div className='App'>
-          <Router>
-            <Routes>
-              <Route exact path="/" element={ <IndexPage notes={this.state.notes} />} />
-              <Route exact path="/notes/:id" element={<ShowPage notes={this.state.notes} />} />
-            </Routes>
-          </Router>
-
+          <Navbar />
+          <div className='app-content'>
+            <Route exact path="/" component={(props) => <IndexPage {...props} notes={this.state.notes} />} />
+            <Route exact path="/notes/:id" component={(props) => <ShowPage {...props} note={this.state.notes[props.match.params.id]} />} />
+            <Route exact path="/new" component={(props) => <NewPage {...props} onSave={this.handleSave} />} />
+          </div>      
         </div>
+        </Router>
     );
   }
 }
